@@ -56,7 +56,6 @@ app.get('/api/twitter/user/:username', async (req, res) => {
     }
 });
 
-
 app.post('/api/analyze-colors', async (req, res) => {
     const { colors } = req.body;
     
@@ -141,11 +140,13 @@ function hexToHSL(hex) {
         l: l * 100
     };
 }
+
 app.get('/api/health', (req, res) => {
     res.json({ status: 'ok' });
 });
+
 app.get('/favicon.ico', (req, res) => {
-    res.status(204).end(); // "No Content" status
+    res.status(204).end();
 });
 
 setInterval(() => {
