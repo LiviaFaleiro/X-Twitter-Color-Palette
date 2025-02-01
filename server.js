@@ -2,10 +2,18 @@ const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
 const path = require('path');
-process.removeAllListeners('warning');
 
 const app = express();
-app.use(cors());
+app.use(cors({
+    origin: true,
+    credentials: true
+}));
+
+app.use((req, res, next) => {
+    res.header('Content-Type', 'application/json');
+    next();
+});
+
 app.use(express.static(path.join(__dirname)));
 app.use(express.json());
 
