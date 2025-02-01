@@ -144,7 +144,9 @@ function hexToHSL(hex) {
 app.get('/api/health', (req, res) => {
     res.json({ status: 'ok' });
 });
-
+app.get('/favicon.ico', (req, res) => {
+    res.status(204).end(); // "No Content" status
+});
 
 setInterval(() => {
     const now = Date.now();
