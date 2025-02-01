@@ -85,17 +85,15 @@ document.getElementById('profile-form').addEventListener('submit', async functio
             body: JSON.stringify({ colors })
         });
         const analysis = await analysisResponse.json();
-        if (analysis.error) {
-            throw new Error(analysis.error);
-        }
+        
         resultContainer.innerHTML = `
-    <div class="alert alert-success">
-        <h3>Color Profile Analysis</h3>
-        <div class="personality mb-3">${analysis.personality || 'Your colors reveal a unique personality!'}</div>
-        <div class="character mb-2">✨ Character Match: ${analysis.character || 'A fascinating character match'}</div>
-        <div class="season">🌈 Season: ${analysis.season || 'A perfect seasonal blend'}</div>
-    </div>
-`;
+        <div class="alert alert-success">
+            <h3>Color Profile Analysis</h3>
+            <div class="personality mb-3">${analysis.personality || 'Vibrant and expressive'}</div>
+            <div class="season">🌈 Season: ${analysis.season || 'A perfect blend of seasons'}</div>
+        </div>
+    `;
+    
 
     } catch (error) {
         console.error('Error:', error);

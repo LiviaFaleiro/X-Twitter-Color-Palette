@@ -2,7 +2,6 @@ const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
 const path = require('path');
-const { Configuration, OpenAIApi } = require('openai');
 process.removeAllListeners('warning');
 
 const app = express();
@@ -14,13 +13,6 @@ require('dotenv').config();
 const BEARER_TOKEN = process.env.TWITTER_BEARER_TOKEN;
 const API_CACHE_TIME = 24 * 60 * 60 * 1000; // 24h
 const userDataCache = new Map();
-
-const OpenAI = require('openai');
-
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY
-});
-
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
@@ -69,24 +61,89 @@ app.get('/api/twitter/user/:username', async (req, res) => {
 
 app.post('/api/analyze-colors', async (req, res) => {
     const { colors } = req.body;
-    try {
-        const completion = await openai.chat.completions.create({
-            model: "gpt-3.5-turbo",
-            messages: [{
-                role: "user",
-                content: `Analyze these colors: ${colors.join(', ')}. Provide a JSON response with three properties: 
-                    personality (a description of personality traits based on these colors), 
-                    character (a fictional character that matches this color palette and personality), 
-                    season (the most fitting season for this palette and why). 
-                    Keep the response fun, creative and under 100 words total.`
-            }]
+    
+    function analyzeColors(colors) {
+        let warmColors = 0;
+        let coolColors = 0;
+        
+        colors.forEach(color => {
+            const hsl = hexToHSL(color);
+            
+            if ((hsl.h >= 0 && hsl.h <= 60) || hsl.h >= 320) {
+                warmColors++;
+            }
+            else if (hsl.h > 180 && hsl.h < 320) {
+                coolColors++;
+            }
         });
         
-        res.json(JSON.parse(completion.choices[0].message.content));
+        if (warmColors > coolColors) {
+            if (colors.some(c => hexToHSL(c).s > 70)) {
+                return {
+                    personality: "Energetic, outgoing, and full of life",
+                    season: "Summer: These vibrant warm tones reflect the energy of sunny days"
+                };
+            } else {
+                return {
+                    personality: "Grounded, creative, and nurturing",
+                    season: "Autumn: Rich, warm hues that mirror falling leaves"
+                };
+            }
+        } else {
+            if (colors.some(c => hexToHSL(c).l > 70)) {
+                return {
+                    personality: "Optimistic, refreshing, and inspiring",
+                    season: "Spring: Fresh and bright like new beginnings"
+                };
+            } else {
+                return {
+                    personality: "Elegant, mysterious, and confident",
+                    season: "Winter: Cool and sophisticated tones"
+                };
+            }
+        }
+    }
+    
+    try {
+        const analysis = analyzeColors(colors);
+        res.json(analysis);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({
+            error: "Color analysis error",
+            details: error.message
+        });
     }
 });
+
+function hexToHSL(hex) {
+    let r = parseInt(hex.slice(1, 3), 16) / 255;
+    let g = parseInt(hex.slice(3, 5), 16) / 255;
+    let b = parseInt(hex.slice(5, 7), 16) / 255;
+
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    let h, s, l = (max + min) / 2;
+
+    if (max === min) {
+        h = s = 0;
+    } else {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+            case g: h = (b - r) / d + 2; break;
+            case b: h = (r - g) / d + 4; break;
+        }
+        h *= 60;
+    }
+
+    return {
+        h: h,
+        s: s * 100,
+        l: l * 100
+    };
+}
+
 setInterval(() => {
     const now = Date.now();
     for (const [key, value] of userDataCache.entries()) {
