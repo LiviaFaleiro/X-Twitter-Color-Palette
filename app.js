@@ -22,7 +22,7 @@ document.getElementById('profile-form').addEventListener('submit', async functio
 
     try {
         console.log('Fetching data for:', username);
-        const apiResponse = await fetch(`http://localhost:3000/api/twitter/user/${username.substring(1)}`);
+        const apiResponse = await fetch(`/api/twitter/user/${username.substring(1)}`);
         const data = await apiResponse.json();
         console.log('API Response:', data);
 
@@ -77,7 +77,7 @@ document.getElementById('profile-form').addEventListener('submit', async functio
             paletteContainer.appendChild(colorBox);
         });
 
-        const analysisResponse = await fetch('http://localhost:3000/api/analyze-colors', {
+        const analysisResponse = await fetch('/api/analyze-colors', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
