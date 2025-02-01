@@ -20,7 +20,7 @@ app.get('/', (req, res) => {
 
 app.get('/api/twitter/user/:username', async (req, res) => {
     const username = req.params.username;
-    
+    res.setHeader('Content-Type', 'application/json');
     if (userDataCache.has(username)) {
         const cachedData = userDataCache.get(username);
         if (Date.now() - cachedData.timestamp < API_CACHE_TIME) {
@@ -34,8 +34,7 @@ app.get('/api/twitter/user/:username', async (req, res) => {
             `https://api.twitter.com/2/users/by/username/${username}?user.fields=profile_image_url,profile_banner_url,name,username`,
             {
                 headers: {
-                    'Authorization': `Bearer ${BEARER_TOKEN}`,
-                    'Content-Type': 'application/json'
+                    'Authorization': `Bearer ${BEARER_TOKEN}`
                 }
             }
         );

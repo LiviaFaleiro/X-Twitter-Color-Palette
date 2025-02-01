@@ -23,12 +23,14 @@ document.getElementById('profile-form').addEventListener('submit', async functio
     try {
         console.log('Fetching data for:', username);
         const apiResponse = await fetch(`/api/twitter/user/${username.substring(1)}`);
-        const data = await apiResponse.json();
-        console.log('API Response:', data);
 
         if (!apiResponse.ok) {
-            throw new Error(data.message || 'Error fetching user');
+            const errorData = await apiResponse.json();
+        throw new Error(errorData.message || 'Error fetching user data');
         }
+
+        const data = await apiResponse.json();
+        console.log('API Response:', data);
 
         profileName.textContent = data.data.name;
         profileUsername.textContent = `@${data.data.username}`;
@@ -99,7 +101,7 @@ document.getElementById('profile-form').addEventListener('submit', async functio
         console.error('Error:', error);
         resultContainer.innerHTML = `
             <div class="alert alert-danger">
-                ${error.message}
+                ${error.message || 'An unexpected error occurred'}
             </div>
         `;
     }
