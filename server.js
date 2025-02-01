@@ -19,14 +19,14 @@ app.get('/', (req, res) => {
 });
 
 app.get('/api/twitter/user/:username', async (req, res) => {
-    const username = req.params.username;
     res.setHeader('Content-Type', 'application/json');
-    if (userDataCache.has(username)) {
-        const cachedData = userDataCache.get(username);
-        if (Date.now() - cachedData.timestamp < API_CACHE_TIME) {
-            return res.json(cachedData.data);
-        }
-        userDataCache.delete(username);
+    const username = req.params.username;
+
+    if (!BEARER_TOKEN) {
+        return res.status(500).json({
+            status: 'error',
+            message: 'Twitter API configuration is missing'
+        });
     }
 
     try {
@@ -39,24 +39,15 @@ app.get('/api/twitter/user/:username', async (req, res) => {
             }
         );
         
-        userDataCache.set(username, {
-            timestamp: Date.now(),
-            data: response.data
-        });
-
-        res.json(response.data);
+        return res.json(response.data);
     } catch (error) {
-        const status = error.response?.status || 500;
-        const message = status === 429 ? 
-            'Taking a break to respect Twitter limits. Try again in a few minutes.' : 
-            error.message;
-            
-        res.status(status).json({
+        return res.status(error.response?.status || 500).json({
             status: 'error',
-            message
+            message: error.response?.data?.message || error.message
         });
     }
 });
+
 
 app.post('/api/analyze-colors', async (req, res) => {
     const { colors } = req.body;

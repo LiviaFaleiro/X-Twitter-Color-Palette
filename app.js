@@ -23,15 +23,18 @@ document.getElementById('profile-form').addEventListener('submit', async functio
     try {
         console.log('Fetching data for:', username);
         const apiResponse = await fetch(`/api/twitter/user/${username.substring(1)}`);
-
-        if (!apiResponse.ok) {
-            const errorData = await apiResponse.json();
-        throw new Error(errorData.message || 'Error fetching user data');
+        
+        const contentType = apiResponse.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            throw new Error('Invalid response format from server');
         }
-
+    
         const data = await apiResponse.json();
         console.log('API Response:', data);
-
+    
+        if (!apiResponse.ok) {
+            throw new Error(data.message || 'Error fetching user');
+        }
         profileName.textContent = data.data.name;
         profileUsername.textContent = `@${data.data.username}`;
         profileImage.src = data.data.profile_image_url;
