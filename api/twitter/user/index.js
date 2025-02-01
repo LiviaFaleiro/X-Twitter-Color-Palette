@@ -1,8 +1,13 @@
 const axios = require('axios');
 
 module.exports = async (req, res) => {
-    const username = req.query.username || req.params.username;
+    // Get username from URL path
+    const username = req.url.split('/').pop();
     const BEARER_TOKEN = process.env.TWITTER_BEARER_TOKEN;
+
+    // Set CORS headers
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET');
 
     try {
         const response = await axios.get(
