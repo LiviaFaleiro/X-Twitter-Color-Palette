@@ -141,6 +141,10 @@ function hexToHSL(hex) {
         l: l * 100
     };
 }
+app.get('/api/health', (req, res) => {
+    res.json({ status: 'ok' });
+});
+
 
 setInterval(() => {
     const now = Date.now();
