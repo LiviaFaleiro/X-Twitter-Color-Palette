@@ -51,113 +51,61 @@ document.getElementById('profile-form').addEventListener('submit', async functio
             colorBox.setAttribute('title', color);
             colorBox.addEventListener('click', () => {
                 navigator.clipboard.writeText(color);
-                alert(`Color ${color} copied to clipboard!`);
+                
+                const toastContainer = document.createElement('div');
+                toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+                toastContainer.innerHTML = `
+                    <div class="toast align-items-center text-white bg-success border-0" role="alert">
+                        <div class="d-flex">
+                            <div class="toast-body">
+                                Color ${color} copied to clipboard!
+                            </div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(toastContainer);
+
+                const toastElement = toastContainer.querySelector('.toast');
+                const toast = new bootstrap.Toast(toastElement);
+                toast.show();
+
+                toastElement.addEventListener('hidden.bs.toast', () => {
+                    toastContainer.remove();
+                });
             });
             paletteContainer.appendChild(colorBox);
         });
 
-        const season = analyzeSeason(colors);
+        const analysisResponse = await fetch('http://localhost:3000/api/analyze-colors', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ colors })
+        });
+        const analysis = await analysisResponse.json();
+        if (analysis.error) {
+            throw new Error(analysis.error);
+        }
         resultContainer.innerHTML = `
-            <div class="alert alert-success">
-                <h3>Matching Season: ${season.name}</h3>
-                <p>${season.description}</p>
-            </div>
-        `;
+    <div class="alert alert-success">
+        <h3>Color Profile Analysis</h3>
+        <div class="personality mb-3">${analysis.personality || 'Your colors reveal a unique personality!'}</div>
+        <div class="character mb-2">✨ Character Match: ${analysis.character || 'A fascinating character match'}</div>
+        <div class="season">🌈 Season: ${analysis.season || 'A perfect seasonal blend'}</div>
+    </div>
+`;
+
     } catch (error) {
         console.error('Error:', error);
-        if (error.message.includes('rate limit')) {
-            resultContainer.innerHTML = `
-                <div class="alert alert-info">
-                    <h4>Taking a break!</h4>
-                    <p>We'll try again in a few minutes.</p>
-                    <div class="progress mt-2">
-                        <div class="progress-bar progress-bar-striped progress-bar-animated" 
-                             role="progressbar" 
-                             style="width: 0%"></div>
-                    </div>
-                </div>
-            `;
-        } else {
-            resultContainer.innerHTML = `
-                <div class="alert alert-danger">
-                    ${error.message}
-                </div>
-            `;
-        }
+        resultContainer.innerHTML = `
+            <div class="alert alert-danger">
+                ${error.message}
+            </div>
+        `;
     }
 });
-
-function analyzeSeason(colors) {
-    const seasonRanges = {
-        summer: {
-            hues: [[330, 360], [0, 30]],
-            saturation: [30, 70],
-            lightness: [45, 85]
-        },
-        winter: {
-            hues: [[180, 270]],
-            saturation: [40, 100],
-            lightness: [20, 60]
-        },
-        spring: {
-            hues: [[45, 150]],
-            saturation: [60, 100],
-            lightness: [50, 85]
-        },
-        fall: {
-            hues: [[15, 45]],
-            saturation: [40, 90],
-            lightness: [30, 60]
-        }
-    };
-
-    const colorMatches = {
-        summer: 0,
-        winter: 0,
-        spring: 0,
-        fall: 0
-    };
-
-    colors.forEach(color => {
-        const hsl = hexToHSL(color);
-        
-        Object.entries(seasonRanges).forEach(([season, ranges]) => {
-            const hueMatch = ranges.hues.some(([min, max]) => 
-                hsl.h >= min && hsl.h <= max
-            );
-            const satMatch = hsl.s >= ranges.saturation[0] && hsl.s <= ranges.saturation[1];
-            const lightMatch = hsl.l >= ranges.lightness[0] && hsl.l <= ranges.lightness[1];
-            
-            if (hueMatch && satMatch && lightMatch) {
-                colorMatches[season] += 1;
-            }
-        });
-    });
-
-    const maxSeason = Object.entries(colorMatches)
-        .reduce((a, b) => (a[1] > b[1] ? a : b))[0];
-
-    const seasons = {
-        summer: {
-            name: 'Summer',
-            description: 'A vibrant palette with warm pinks and bright reds, reflecting the energy and warmth of summer days.'
-        },
-        winter: {
-            name: 'Winter',
-            description: 'Deep blues and cool purples create a sophisticated and dramatic winter atmosphere.'
-        },
-        spring: {
-            name: 'Spring',
-            description: 'Fresh yellows and vibrant greens capture the essence of nature s renewal and spring vitality.'
-        },
-        fall: {
-            name: 'Fall',
-            description: 'Rich oranges and earthy browns evoke the warmth and coziness of autumn landscapes.'
-        }
-    };
-
-    return seasons[maxSeason];
-}
 
 function hexToHSL(hex) {
     let r = parseInt(hex.slice(1, 3), 16) / 255;
