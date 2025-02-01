@@ -22,19 +22,19 @@ document.getElementById('profile-form').addEventListener('submit', async functio
 
     try {
         console.log('Fetching data for:', username);
-        const apiResponse = await fetch(`/api/twitter/user/${username.substring(1)}`);
-        
-        const contentType = apiResponse.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-            throw new Error('Invalid response format from server');
+        const apiResponse = await fetch(`/api/twitter/user/${username.substring(1)}`, {
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+    
+        if (!apiResponse.ok) {
+            const errorData = await apiResponse.json().catch(() => ({}));
+            throw new Error(errorData.message || 'Failed to fetch user data');
         }
     
         const data = await apiResponse.json();
         console.log('API Response:', data);
-    
-        if (!apiResponse.ok) {
-            throw new Error(data.message || 'Error fetching user');
-        }
         profileName.textContent = data.data.name;
         profileUsername.textContent = `@${data.data.username}`;
         profileImage.src = data.data.profile_image_url;
@@ -104,7 +104,7 @@ document.getElementById('profile-form').addEventListener('submit', async functio
         console.error('Error:', error);
         resultContainer.innerHTML = `
             <div class="alert alert-danger">
-                ${error.message || 'An unexpected error occurred'}
+                ${error.message}
             </div>
         `;
     }
