@@ -1,7 +1,7 @@
 const axios = require('axios');
 
 module.exports = async (req, res) => {
-    const { username } = req.query;
+    const username = req.query.username || req.params.username;
     const BEARER_TOKEN = process.env.TWITTER_BEARER_TOKEN;
 
     try {
@@ -13,9 +13,9 @@ module.exports = async (req, res) => {
                 }
             }
         );
-        return res.json(response.data);
+        res.json(response.data);
     } catch (error) {
-        return res.status(error.response?.status || 500).json({
+        res.status(error.response?.status || 500).json({
             status: 'error',
             message: error.response?.data?.message || error.message
         });
