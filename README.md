@@ -27,14 +27,14 @@ A web application that analyzes Twitter profiles to generate color palettes and 
 - Modern web browser with JavaScript enabled
 
 ### Color Analysis
-# Utilizes HSL-based analysis to evaluate:
+Utilizes HSL-based analysis to evaluate:
 
-    -Temperature & tonal values
-    -Seasonal color harmony
-    -Complementary color matching
+- Temperature & tonal values
+- Seasonal color harmony
+- Complementary color matching
 
 ### How to Use
-- Ebter a Twitter username in the search bar.
+- Enter a Twitter username in the search bar.
 - Click the "Generate Oalette" button to initiate.
 - Explore the generated color palette and seasonal color matching.
 - Switch between Dark and Light modes for a personalized experience.
