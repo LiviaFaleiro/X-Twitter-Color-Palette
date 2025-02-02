@@ -15,9 +15,9 @@
         <i id="themeIcon" class="fas fa-sun"></i>
     </button>
     <button class="lang-toggle" onclick="toggleLanguage()">
-        <i class="fas fa-language"></i>
-        <span id="langText">EN</span>
+        <span id="langText">English</span>
     </button>
+    
     
     <div class="container py-5">
         <div class="row justify-content-center">
@@ -80,16 +80,15 @@
     function toggleLanguage() {
         const langText = document.getElementById('langText');
         const currentLang = langText.textContent;
-        const newLang = currentLang === 'EN' ? 'PT' : 'EN';
+        const newLang = currentLang === 'English' ? 'Português' : 'English';
         langText.textContent = newLang;
         
         const event = new CustomEvent('languageChange', { 
-            detail: newLang === 'PT' ? 'pt-br' : 'en' 
+            detail: newLang === 'Português' ? 'pt-br' : 'en' 
         });
         document.dispatchEvent(event);
     }
     </script>
-    
     
 </body>
 </html>
