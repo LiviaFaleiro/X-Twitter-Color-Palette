@@ -1,6 +1,10 @@
-document.getElementById('profile-form').addEventListener('submit', async function (event) {
-    event.preventDefault();
-    console.log('Form submitted');
+import { fetchUserData } from './src/api/fetchUserData.js'; // Import the fetchUserData function from the fetchUserData.js file
+import { PaletteGenerator } from './src/components/PaletteGenerator.js'; // Import the PaletteGenerator component from the PaletteGenerator.js file
+
+
+document.getElementById('profile-form').addEventListener('submit', async function (event) { 
+    event.preventDefault(); 
+    console.log('Form submitted'); 
 
     const username = document.getElementById('username').value.trim();
     const profileDataContainer = document.getElementById('profileData');
@@ -85,20 +89,27 @@ document.getElementById('profile-form').addEventListener('submit', async functio
         const analysisResponse = await fetch('/api/analyze-colors', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
             },
-            body: JSON.stringify({ colors })
+            body: JSON.stringify({ 
+                colors: colors.filter(color => color && color.startsWith('#')) 
+            })
         });
+        
+        console.log('Colors being sent:', colors);
         const analysis = await analysisResponse.json();
+        console.log('Analysis received:', analysis);
         
         resultContainer.innerHTML = `
-        <div class="alert alert-success">
-            <h3>Color Profile Analysis</h3>
-            <div class="personality mb-3">${analysis.personality || 'Vibrant and expressive'}</div>
-            <div class="season">🌈 Season: ${analysis.season || 'A perfect blend of seasons'}</div>
-        </div>
-    `;
-    
+            <div class="alert alert-success">
+                <h3>Color Profile Analysis</h3>
+                <div class="personality mb-3">${analysis.personality || 'Vibrant and expressive'}</div>
+                <div class="season">🌈 ${analysis.season || 'A perfect blend of seasons'}</div>
+            </div>
+        `;
+        
+        
 
     } catch (error) {
         console.error('Error:', error);
@@ -110,31 +121,3 @@ document.getElementById('profile-form').addEventListener('submit', async functio
     }
 });
 
-function hexToHSL(hex) {
-    let r = parseInt(hex.slice(1, 3), 16) / 255;
-    let g = parseInt(hex.slice(3, 5), 16) / 255;
-    let b = parseInt(hex.slice(5, 7), 16) / 255;
-
-    const max = Math.max(r, g, b);
-    const min = Math.min(r, g, b);
-    let h, s, l = (max + min) / 2;
-
-    if (max === min) {
-        h = s = 0;
-    } else {
-        const d = max - min;
-        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-        switch (max) {
-            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-            case g: h = (b - r) / d + 2; break;
-            case b: h = (r - g) / d + 4; break;
-        }
-        h *= 60;
-    }
-
-    return {
-        h: h,
-        s: s * 100,
-        l: l * 100
-    };
-}
