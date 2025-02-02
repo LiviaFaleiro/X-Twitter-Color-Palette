@@ -1,6 +1,36 @@
 import { fetchUserData } from './src/api/fetchUserData.js'; // Import the fetchUserData function from the fetchUserData.js file
 import { PaletteGenerator } from './src/components/PaletteGenerator.js'; // Import the PaletteGenerator component from the PaletteGenerator.js file
 
+const translations = {
+    en: {
+        title: "Twitter Color Palette Generator",
+        placeholder: "Enter Twitter handle",
+        generateButton: "Generate Palette",
+        followMe: "Follow me on twitter/x @moisiFraise",
+        analysisTitle: "Color Profile Analysis"
+    },
+    'pt-br': {
+        title: "Gerador de Paleta de Cores do Twitter",
+        placeholder: "Digite o usuário do Twitter",
+        generateButton: "Gerar Paleta",
+        followMe: "Me siga no twitter/x @moisiFraise",
+        analysisTitle: "Análise de Cores do perfil"
+
+    }
+};
+
+let currentLang = 'en';
+
+document.addEventListener('languageChange', (event) => {
+    currentLang = event.detail;
+    updatePageText();
+});
+function updatePageText() {
+    document.querySelector('h1').textContent = translations[currentLang].title;
+    document.querySelector('#username').placeholder = translations[currentLang].placeholder;
+    document.querySelector('button[type="submit"]').textContent = translations[currentLang].generateButton;
+    document.querySelector('.animated-text').textContent = translations[currentLang].followMe;
+}
 
 document.getElementById('profile-form').addEventListener('submit', async function (event) { 
     event.preventDefault(); 
@@ -93,23 +123,24 @@ document.getElementById('profile-form').addEventListener('submit', async functio
                 'Accept': 'application/json'
             },
             body: JSON.stringify({ 
-                colors: colors.filter(color => color && color.startsWith('#')) 
+                colors: colors.filter(color => color && color.startsWith('#')),
+                language: currentLang 
             })
         });
+        
         
         console.log('Colors being sent:', colors);
         const analysis = await analysisResponse.json();
         console.log('Analysis received:', analysis);
         
         resultContainer.innerHTML = `
-            <div class="alert alert-success">
-                <h3>Color Profile Analysis</h3>
-                <div class="personality mb-3">${analysis.personality || 'Vibrant and expressive'}</div>
-                <div class="season">🌈 ${analysis.season || 'A perfect blend of seasons'}</div>
-            </div>
-        `;
-        
-        
+        <div class="alert alert-success">
+            <h3>${translations[currentLang].analysisTitle}</h3>
+            <div class="personality mb-3">${analysis.personality}</div>
+            <div class="season">🌈 ${analysis.season}</div>
+        </div>
+    `;
+    
 
     } catch (error) {
         console.error('Error:', error);

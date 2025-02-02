@@ -143,3 +143,21 @@ footer {
     border-radius: 12px;
     padding: 1rem;
 }
+.lang-toggle {
+    position: fixed;
+    top: 20px;
+    right: 80px;
+    padding: 10px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    cursor: pointer;
+    width: 45px;
+    height: 45px;
+    transition: all 0.3s ease;
+}
+
+.lang-toggle:hover {
+    transform: scale(1.1);
+}
